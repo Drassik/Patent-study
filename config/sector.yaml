@@ -1,0 +1,350 @@
+# Team 28 · Innovation Management (01TXIWS, A.Y. 2026/27 · Politecnico di Torino)
+# Single source of truth for Sector Definition, Step 0/1/2 Parameters, Benchmarks, and Official Taxonomies.
+
+project:
+  team: "Team 28"
+  sector_name: "Flying drones"
+  sector_short: "UAV"
+  client_name: "Leonardo S.p.A."
+  course: "Innovation Management (01TXIWS) · A.Y. 2026/27"
+  lecturer: "Prof. Grazia Sveva Ascione"
+  tutor: "Dr. Giacomo Masali"
+  student_tutor: "Fatima Syeda Wasti"
+  members:
+    - { name: "Omar Boujendar", id: "350435", role: "Spokesperson" }
+    - { name: "Beybin Cicek", id: "351818", role: "Member" }
+    - { name: "Elena Rossi", id: "349342", role: "Member" }
+    - { name: "Samuele Tommasi", id: "361788", role: "Member" }
+    - { name: "Parsa Teimouri", id: "358965", role: "Member" }
+
+# ------------------------------------------------------------------ Time & Counting Rules
+time_window:
+  year_min: 2004          # Aligned with Query_Calibration_Taxonomy_Audit.ipynb (YEAR_WINDOW)
+  year_max: 2025
+  truncation_years: 3     # Last 3 priority/filing years incomplete due to 18-month publication + PATSTAT lag
+  family_time_column: "earliest_filing_year"
+  appln_time_column: "appln_filing_year"
+  publn_truncation_years: 1
+
+counting_rules:
+  ipr_type: "PI"          # Patents of Invention only (excludes utility models)
+  ip5_offices: ["EP", "US", "CN", "JP", "KR"]
+  top_n_categories: 8
+  top_n_applicants: 15
+  incumbent_split_year: 2018  # Applicants with first UAV family before this year are incumbents
+
+# ------------------------------------------------------------------ Step 0 Query Configuration
+# Preferred workflow: consume Samuele's locked Step 0 family CSV so every team notebook shares
+# the exact same DOCDB family universe. If the CSV is not present, the loader builds the query
+# directly from the structured rules below.
+step0:
+  locked_families_csv_candidates:
+    - "data/uav_core_boundary_validation/uav_final_query_families.csv"
+    - "../data/uav_core_boundary_validation/uav_final_query_families.csv"
+    - "data/processed/step0_uav_families.csv"
+    - "../data/processed/step0_uav_families.csv"
+
+  # Unconditional aerial-exclusive core classes (high precision)
+  # NOTE on IPC B64C 39/02 & CPC G05D 1/228:
+  #   - IPC B64C 39/02 is "Aircraft characterised by special use" (includes manned special-purpose aircraft,
+  #     which dropped unconditional Core precision to 51.4% in the Nov 18 audit). It must be gated by
+  #     UAV keywords in the Boundary Rescue tier rather than kept unconditional.
+  #   - CPC G05D 1/228 covers on-board command input for ALL unmanned vehicles (including UGVs/USVs)
+  #     and should likewise be gated by aerial UAV keywords.
+  core_cpc_prefixes:
+    - "B64U"          # Unmanned aerial vehicles [UAVs]; equipment therefor (dedicated CPC subclass since 2023)
+    - "B64C39/024"    # CPC-specific RPV / remote-controlled aircraft (pre-2023 UAV home)
+    - "B64C2201"      # Former UAV indexing scheme (reclassified into B64U in 2023; retained as safety net)
+    - "G08G5/57"      # Air traffic control / guidance specifically for unmanned aircraft
+    - "G08G5/27"      # Air traffic control network coverage management for UAVs
+
+  core_ipc_prefixes:
+    - "B64U"          # IPC B64U (introduced 2023; recovers CN/JP/KR families lacking CPC reclassification)
+
+  # Boundary classes rescued ONLY when English title or abstract matches positive_keywords
+  # and does NOT match negative_keywords
+  boundary_cpc_prefixes:
+    - "G05D1/"        # Control of position, course, altitude or attitude of vehicles (incl. G05D 1/228)
+    - "G08G5/"        # Traffic control systems for aircraft (high-purity UAV subgroups like G08G 5/59, 5/55)
+
+  boundary_ipc_prefixes:
+    - "B64C39/02"     # IPC special-use aircraft (contains historical CN/JP/KR UAVs; requires keyword gate)
+
+  # Positive & negative regex keywords calibrated in Query_Calibration_Taxonomy_Audit.ipynb
+  # and cross-checked with UAV patent literature (Zheng et al., 2026; JOITMC, 2020; Choe, 2023)
+  positive_keywords:
+    - "\\buav\\b"
+    - "\\buavs\\b"
+    - "\\buas\\b"
+    - "\\brpas\\b"
+    - "\\bunmanned aerial\\b"
+    - "\\buncrewed aerial\\b"
+    - "\\bunmanned aircraft\\b"
+    - "\\bunmanned air\\b"
+    - "\\bunmanned flight\\b"
+    - "\\bunmanned flying\\b"
+    - "\\bremotely piloted\\b"
+    - "\\bdrone\\b"
+    - "\\bdrones\\b"
+    - "\\bquadrotor\\b"
+    - "\\bquadcopter\\b"
+    - "\\bmultirotor\\b"
+    - "\\bmulticopter\\b"
+    - "\\bhexacopter\\b"
+    - "\\boctocopter\\b"
+    - "\\bevtol\\b"
+    - "\\bvtol\\b"
+    - "\\brotorcraft\\b"
+    - "\\bflying robot\\b"
+    - "\\bflying vehicle\\b"
+    - "\\baerial vehicle\\b"
+    - "\\baerial vehicles\\b"
+    - "\\baerial platform\\b"
+    - "\\bmicro air\\b"
+    - "\\bloitering munition\\b"
+
+  negative_keywords:
+    - "\\bautonomous driving\\b"
+    - "\\broad vehicle\\b"
+    - "\\blawnmower\\b"
+    - "\\bsubmersible\\b"
+    - "\\bunderwater vehicle\\b"
+    - "\\bunmanned underwater\\b"
+    - "\\bunmanned surface\\b"
+    - "\\bauv\\b"
+    - "\\busv\\b"
+    - "\\bugv\\b"
+
+# ------------------------------------------------------------------ Step 1 Q4: Patents vs Secrecy
+q4_secrecy:
+  # Mutually exclusive UAV sub-segments (priority order: military > dual_use > civil)
+  military_cpc_prefixes:
+    - "B64U2101/15"   # UAVs for conventional or electronic warfare
+    - "B64U2101/16"   # UAVs for controlling, capturing or immobilising other vehicles
+    - "B64U2101/17"   # UAVs for detecting, disrupting or countering communications
+    - "B64U2101/18"   # UAVs for dropping bombs or firing ammunition
+    - "B64U2101/19"   # UAVs for use as targets or decoys
+    - "F41"           # Weapons (co-classification with UAV family)
+    - "F42B10/"       # Aerodynamic projectiles / guided munitions
+    - "F42B12/"       # Projectiles / missiles characterised by warhead
+    - "F42B15/"       # Self-propelled projectiles or missiles
+
+  dual_use_cpc_prefixes:
+    - "B64U2101/31"   # UAVs for surveillance, inspection or monitoring (ISR / dual-use)
+
+  benchmarks:
+    manned_aircraft:
+      label: "Manned aircraft (excl. UAVs)"
+      cpc_prefixes: ["B64C", "B64D"]
+    autonomous_vehicles:
+      label: "Autonomous road vehicles"
+      cpc_prefixes: ["B60W60/"]
+
+# ------------------------------------------------------------------ Official CPC Definitions
+# Verified against EPO / USPTO / WIPO CPC schemes
+cpc_definitions:
+  subclasses:
+    B64U: "Unmanned aerial vehicles [UAVs]; equipment therefor"
+    B64C: "Aeroplanes; helicopters (incl. legacy RPV code B64C 39/024)"
+    B64D: "Equipment for fitting in or to aircraft; flying suits; parachutes; power plants"
+    B64F: "Ground or aircraft-carrier-deck installations specially adapted for aircraft"
+    G05D: "Systems for controlling or regulating non-electric variables (autonomy, flight control)"
+    G08G: "Traffic control systems (UTM, air traffic management, geofencing)"
+    G01C: "Measuring distances, levels or bearings; surveying; navigation; gyroscopic instruments"
+    G01S: "Radio direction-finding; radar; lidar; sonar; satellite navigation (GNSS)"
+    H04N: "Pictorial communication (aerial cameras, gimbals, video transmission)"
+    H04W: "Wireless communication networks (UAV datalinks, cellular/5G command & control)"
+    H04B: "Transmission (RF datalinks, anti-jamming, telemetry)"
+    G06V: "Image or video recognition or understanding (computer vision, target tracking)"
+    G06T: "Image data processing or generation (photogrammetry, SLAM, 3D mapping)"
+    G06F: "Electric digital data processing (on-board computing, mission planning)"
+    G06Q: "Data processing systems for administrative, commercial or logistics purposes (delivery)"
+    H02J: "Circuit arrangements or systems for supplying or distributing electric power (charging/docking)"
+    H01M: "Processes or means for direct conversion of chemical into electrical energy (batteries, fuel cells)"
+    A01M: "Catching, trapping or scaring of animals; apparatus for destruction of noxious plants (agricultural spraying)"
+    A01C: "Planting; sowing; fertilising (precision agriculture UAVs)"
+    F41H: "Armour; armoured turrets; means of attack or defence (counter-UAS, military)"
+    F42B: "Explosive charges; fireworks; ammunition; missiles"
+    B60L: "Propulsion of electrically-propelled vehicles; power supply"
+    B60W: "Conjoint control of vehicle sub-units (benchmark: B60W 60 automated driving)"
+
+  b64u_main_groups:
+    "B64U10/": "Type of UAV (rotorcrafts, multirotors, VTOL, fixed-wing, tethered, MAVs)"
+    "B64U20/": "Constructional aspects of UAVs (airframes, foldable structures, payload bays)"
+    "B64U30/": "Means for producing lift; empennages; wings, rotors & ducted fans"
+    "B64U40/": "On-board mechanical arrangements for adjusting control surfaces, rotors or base configuration"
+    "B64U50/": "Propulsion; power supply (motors, batteries, fuel cells, solar, in-flight charging)"
+    "B64U60/": "Undercarriages (landing gear, skids, shock absorbers)"
+    "B64U70/": "Launching, take-off, or landing arrangements (catapults, nets, docking stations)"
+    "B64U80/": "Transport or storage specially adapted for UAVs (cases, mobile hangars)"
+    "B64U2101/": "Indexing scheme: UAVs characterised by intended use (military, surveillance, delivery, agri)"
+    "B64U2201/": "Indexing scheme: UAV control, navigation and communication aspects"
+
+# ------------------------------------------------------------------ UAV Corporate Tree & Domain Aliases
+# Used in Q4 (Defence Primes vs Commercial Leaders) and Step 2 (optional M&A consolidation per Slide 9)
+domain_corporate_groups:
+  # Client & European/US/Israeli/Turkish Defence Primes
+  LEONARDO:
+    role: "Defence prime (Client)"
+    country: "IT"
+    patterns:
+      - "LEONARDO"
+      - "FINMECCANICA"
+      - "SELEX"
+      - "ALENIA"
+      - "AGUSTAWESTLAND"
+      - "AGUSTA"
+      - "OTO MELARA"
+      - "WASS"
+  LOCKHEED MARTIN:
+    role: "Defence prime"
+    country: "US"
+    patterns:
+      - "LOCKHEED MARTIN"
+      - "LOCKHEED"
+      - "SIKORSKY"
+  NORTHROP GRUMMAN:
+    role: "Defence prime"
+    country: "US"
+    patterns:
+      - "NORTHROP GRUMMAN"
+      - "NORTHROP"
+  BOEING:
+    role: "Defence prime"
+    country: "US"
+    patterns:
+      - "BOEING"
+      - "INSITU"
+      - "AURORA FLIGHT SCIENCES"
+  RTX RAYTHEON:
+    role: "Defence prime"
+    country: "US"
+    patterns:
+      - "RAYTHEON"
+      - "RTX"
+      - "COLLINS AEROSPACE"
+      - "ROCKWELL COLLINS"
+      - "UNITED TECHNOLOGIES"
+      - "PRATT WHITNEY"
+  AIRBUS:
+    role: "Defence prime"
+    country: "EU"
+    patterns:
+      - "AIRBUS"
+      - "EADS"
+      - "EUROCOPTER"
+      - "CASSIDIAN"
+  BAE SYSTEMS:
+    role: "Defence prime"
+    country: "GB"
+    patterns:
+      - "BAE SYSTEMS"
+      - "BRITISH AEROSPACE"
+  THALES:
+    role: "Defence prime"
+    country: "FR"
+    patterns:
+      - "THALES"
+  SAFRAN:
+    role: "Defence prime"
+    country: "FR"
+    patterns:
+      - "SAFRAN"
+      - "SAGEM"
+  GENERAL ATOMICS:
+    role: "Defence prime"
+    country: "US"
+    patterns:
+      - "GENERAL ATOMICS"
+  ELBIT SYSTEMS:
+    role: "Defence prime"
+    country: "IL"
+    patterns:
+      - "ELBIT"
+  ISRAEL AEROSPACE INDUSTRIES:
+    role: "Defence prime"
+    country: "IL"
+    patterns:
+      - "ISRAEL AEROSPACE"
+      - "ISRAEL AIRCRAFT INDUSTRIES"
+  AEROVIRONMENT:
+    role: "Defence / tactical UAV specialist"
+    country: "US"
+    patterns:
+      - "AEROVIRONMENT"
+  BAYKAR:
+    role: "Defence UAV specialist"
+    country: "TR"
+    patterns:
+      - "BAYKAR"
+  # Commercial / Civilian Drone Leaders
+  DJI:
+    role: "Commercial UAV leader"
+    country: "CN"
+    patterns:
+      - "SZ DJI"
+      - "DJI TECHNOLOGY"
+      - "DJI INNOVATION"
+      - "DJI EUROPE"
+      - "DA JIANG"
+      - "DAJIANG"
+      - "SHENZHEN DAJIANG"
+  AUTEL ROBOTICS:
+    role: "Commercial UAV leader"
+    country: "CN"
+    patterns:
+      - "AUTEL ROBOTICS"
+      - "AUTEL INTELLIGENT"
+      - "SHENZHEN AUTEL"
+  PARROT:
+    role: "Commercial / dual-use UAV"
+    country: "FR"
+    patterns:
+      - "PARROT DRONES"
+      - "PARROT SA"
+      - "PARROT"
+      - "SENSEFLY"
+  EHANG:
+    role: "Commercial / eVTOL UAV"
+    country: "CN"
+    patterns:
+      - "EHANG"
+      - "GUANGZHOU EHANG"
+  XAG:
+    role: "Agricultural UAV leader"
+    country: "CN"
+    patterns:
+      - "XAG"
+      - "XAIRCRAFT"
+      - "GUANGZHOU XAIRCRAFT"
+      - "JIFEI"
+  SKYDIO:
+    role: "Autonomous UAV specialist"
+    country: "US"
+    patterns:
+      - "SKYDIO"
+  # Major UAV Research Universities & State Utilities
+  BEIHANG UNIVERSITY:
+    role: "University"
+    country: "CN"
+    patterns:
+      - "BEIHANG UNIVERSITY"
+      - "BEIJING UNIVERSITY OF AERONAUTICS AND ASTRONAUTICS"
+      - "BEIJING UNIV OF AERONAUTICS"
+  NANJING UNIV AERONAUTICS ASTRONAUTICS:
+    role: "University"
+    country: "CN"
+    patterns:
+      - "NANJING UNIVERSITY OF AERONAUTICS AND ASTRONAUTICS"
+      - "NANJING UNIV OF AERONAUTICS"
+  NORTHWESTERN POLYTECHNICAL UNIVERSITY:
+    role: "University"
+    country: "CN"
+    patterns:
+      - "NORTHWESTERN POLYTECHNICAL UNIVERSITY"
+      - "NORTHWESTERN POLYTECHNICAL UNIV"
+  STATE GRID CORP OF CHINA:
+    role: "State utility (inspection UAVs)"
+    country: "CN"
+    patterns:
+      - "STATE GRID"

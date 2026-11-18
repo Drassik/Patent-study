@@ -1,148 +1,69 @@
-# CPC Codes Reference · Flying Drones (Team 28)
+# CPC & IPC Codes Reference · Flying Drones (Team 28)
 
-## Main Sector Definition: Flying Drones (Unmanned Aerial Vehicles)
+Verified against the official EPO/USPTO Cooperative Patent Classification (CPC) and WIPO IPC schemes (`https://www.cooperativepatentclassification.org/cpcSchemeAndDefinitions/table`).
 
-| CPC Code | Official Title | Usage | Notes |
+---
+
+## 1. Main Sector Definition & Step 0 Taxonomy Audit (Nov 18 Diagnosis)
+
+### Tier 1 — Unconditional Aerial-Exclusive Core (`CPC ∪ IPC`)
+| Scheme | Code | Official Title | Role in Step 0 |
 |---|---|---|---|
-| `B64U` | **Unmanned aerial vehicles (UAVs)** | Primary code | Dedicated subclass introduced in 2023; EPO reclassified older documents into it |
-| `B64C39/024` | **Aircraft of the remote-controlled vehicle type (RPV)** | Legacy code | Main pre-2023 code for drones; widely used in historical data |
-| `B64C2201` | **Former indexing scheme for UAVs** | Legacy code | Moved to B64U in 2023; kept as safety net for non-reclassified documents |
+| CPC / IPC | `B64U` | **Unmanned aerial vehicles [UAVs]; equipment therefor** | Dedicated UAV subclass introduced in 2023; IPC `B64U` recovers CN/JP/KR families lacking CPC reclassification |
+| CPC only | `B64C 39/024` | **Aircraft of the remote-controlled vehicle type, i.e. RPV** | Primary pre-2023 CPC home for UAVs |
+| CPC only | `B64C 2201` | **Former indexing scheme for UAVs** | Moved to `B64U` in 2023; kept as safety net for non-reclassified records |
+| CPC | `G08G 5/57` | **Air traffic control / guidance specifically for unmanned aircraft** | Exclusively aerial UAVs |
+| CPC | `G08G 5/27` | **Air traffic control for managing network coverage (e.g. transmission connections for UAVs)** | Exclusively aerial UAVs |
 
-### CPC Code Hierarchy for Drones (B64U subcodes)
-- `B64U` = General UAV classification
-  - `B64U10/` = Characteristics of UAVs
-  - `B64U20/` = Control systems and operational modes
-  - `B64U30/` = UAVs with particular shapes or configurations
-  - `B64U40/` = Propulsion systems
-  - `B64U50/` = Payload or equipment
-  - `B64U60/` = Ground support systems
-  - `B64U70/` = Launching/landing
-  - `B64U80/` = Power supply systems
-  - `B64U90/` = Associated systems and methods
-  - `B64U2101/` = **Use codes (purpose-based classification)**
+### Tier 2 — Boundary Rescue (Requires Calibrated Positive UAV Keywords AND NOT Negative Keywords)
+| Scheme | Code | Official Title | Why Keyword-Gated (Not Unconditional Core) |
+|---|---|---|---|
+| IPC | `B64C 39/02` | **Aircraft not otherwise provided for — characterised by special use** | **Critical audit finding:** Unlike CPC `B64C 39/024` (RPVs), IPC `B64C 39/02` includes manned special-use aircraft. Placing IPC `B64C 39/02` in unconditional Core reduced Core precision to 51.4% (37/72) in the Nov 18 audit. Moving IPC-only `B64C 39/02` into keyword-gated Boundary Rescue preserves historical CN/JP/KR UAV recovery while eliminating manned-aircraft noise. |
+| CPC | `G05D 1/228` | **Command input arrangements located on-board unmanned vehicles** | Covers **all** unmanned vehicles (ground UGVs, marine USVs/AUVs, and aerial UAVs). Gating by aerial UAV keywords prevents ground/marine robotics contamination. |
+| CPC | `G05D 1/` & `G08G 5/` | **Autonomous vehicle control / Air traffic management** | High-purity boundary subgroups (e.g. `G08G 5/59` geofencing 72.0% purity, `G08G 5/55` 62.9% purity) rescued with calibrated positive/negative regex (92.9% precision in Nov 18 audit). |
 
 ---
 
-## Military Drones: Use Codes (B64U2101)
+## 2. Official `B64U` Main Group Hierarchy (Corrected)
 
-The B64U2101 series classifies UAVs by their **intended use**. These are **not** mutually exclusive classifications.
-
-| CPC Code | Official Title | Purpose |
-|---|---|---|
-| `B64U2101/15` | **For conventional or electronic warfare** | Electronic attack, jamming, EW operations |
-| `B64U2101/16` | **For controlling, capturing or immobilising other vehicles** | Swarm control, interception, disabling |
-| `B64U2101/17` | **For detecting, disrupting or countering communications** | Signal intelligence, communications disruption |
-| `B64U2101/18` | **For dropping bombs; for firing ammunition** | Armed strikes, ordnance delivery |
-| `B64U2101/19` | **For use as targets or decoys** | Training, target simulation, decoy operations |
-
-### Note on Military Classification
-- These codes indicate the **stated use** in the patent document
-- Not all military drones may be classified with these codes (generic codes may be used instead)
-- **Precision risk**: CPC assignment is based on the title/abstract; some civil patents might be co-classified with military codes if they mention dual-use technologies
+| CPC Main Group | Official CPC Title |
+|---|---|
+| `B64U 10/00` | **Type of UAV** (rotorcrafts, multirotors, quadcopters, VTOL, fixed-wing, tethered, lighter-than-air, ornithopters, MAVs) |
+| `B64U 20/00` | **Constructional aspects of UAVs** (airframes, foldable structures, stealth shells, payload mounts; excludes lift means in 30/00) |
+| `B64U 30/00` | **Means for producing lift; empennages; arrangements thereof** (wings, rotors, ducted fans) |
+| `B64U 40/00` | **On-board mechanical arrangements for adjusting control surfaces or rotors; in-flight adjustment of base configuration** |
+| `B64U 50/00` | **Propulsion; power supply** (motors, power transmission, batteries, fuel cells, solar, in-flight charging) |
+| `B64U 60/00` | **Undercarriages** (landing gear, skids, shock absorbers) |
+| `B64U 70/00` | **Launching, take-off, or landing arrangements** (catapults, arresting nets, automated docking stations) |
+| `B64U 80/00` | **Transport or storage specially adapted for UAVs** (carrying cases, mobile hangars) |
+| `B64U 2101/00` | **Indexing scheme: UAVs characterised by intended use** (warfare, surveillance, delivery, agriculture, inspection) |
+| `B64U 2201/00` | **Indexing scheme: UAV control, navigation, and communication aspects** |
 
 ---
 
-## Dual-Use (Surveillance): Use Code (B64U2101)
+## 3. Step 1 Q4: Military, Dual-Use & Benchmark Codes
 
-| CPC Code | Official Title | Purpose |
-|---|---|---|
-| `B64U2101/31` | **For surveillance, inspection or monitoring** | Civil and military surveillance; includes civilian monitoring, inspection, data collection |
+### Military UAV Codes (Mutually Exclusive Priority 1)
+- `B64U 2101/15`: For conventional or electronic warfare
+- `B64U 2101/16`: For controlling, capturing or immobilising other vehicles (counter-UAS / swarm interception)
+- `B64U 2101/17`: For detecting, disrupting or countering communications (SIGINT / EW)
+- `B64U 2101/18`: For dropping bombs; for firing ammunition
+- `B64U 2101/19`: For use as targets or decoys
+- Co-classifications with `F41` (Weapons) and `F42B 10/`, `F42B 12/`, `F42B 15/` (Guided projectiles / warheads / missiles)
 
----
+### Dual-Use (Surveillance / ISR) Code (Priority 2, excluding Military)
+- `B64U 2101/31`: For surveillance, inspection or monitoring
 
-## Related Military/Weapons Classifications (Co-classifications)
-
-| CPC Code | Official Title | Relevance |
-|---|---|---|
-| `F41` | **General or ordnance** | Weapons systems; co-classification indicates armed drone capability |
-| `F42B10/` | **Projectiles or missiles characterised by aerodynamic features** | Missile design; indicates precision-guided ordnance |
-| `F42B12/` | **Projectiles or missiles characterised by the warhead** | Warhead design; indicates armed capability |
-| `F42B15/` | **Self-propelled projectiles or missiles** | Autonomous weapons; indicates advanced targeting |
-
----
-
-## Benchmark Fields: Similar Technologies
-
-### Manned Aircraft (for comparison)
-| CPC Code | Official Title | Notes |
-|---|---|---|
-| `B64C` | **Aircraft: characteristics, construction, operation** | Parent class for all aircraft; includes manned and other aircraft types |
-| `B64D` | **Equipment specifically designed for aircraft** | Supports systems for aircraft operation |
-
-**Note for analysis**: Exclude all drone families (`B64U`, `B64C39/024`, `B64C2201`) from the manned aircraft benchmark to avoid overlap.
-
-### Autonomous Road Vehicles (for comparison)
-| CPC Code | Official Title | Notes |
-|---|---|---|
-| `B60W60/` | **Automated driving vehicles** | Autonomous ground vehicles; similar technology maturity and regulatory landscape |
+### External Benchmarks (Excluding all UAV families)
+- **Manned aircraft:** `B64C`, `B64D` (minus all locked UAV families)
+- **Autonomous road vehicles:** `B60W 60/` (automated driving vehicles, minus all locked UAV families)
 
 ---
 
-## Defence Prime Companies (for applicant analysis)
+## 4. Academic Literature Basis for Query & Vocabulary
 
-### Major Prime Contractors (Defense & Aerospace)
-| Company | PATSTAT Name Patterns | Relevance |
-|---|---|---|
-| **Leonardo** (Italian) | `LEONARDO S.p.A`, `FINMECCANICA`, `SELEX`, `ALENIA`, `AGUSTAWESTLAND` | Client for this project; major European defence prime |
-| **Lockheed Martin** (US) | `LOCKHEED MARTIN` | US defence prime; largest segment in military UAVs |
-| **Northrop Grumman** (US) | `NORTHROP GRUMMAN` | US defence prime; Global Hawk, MQ-4C developer |
-| **Raytheon / RTX** (US) | `RAYTHEON` | US defence & aerospace; Tomahawk missiles, advanced systems |
-| **Boeing** (US) | `BOEING` | US aerospace; diverse drone portfolio |
-| **Airbus** (European) | `AIRBUS` | European aerospace; civilian and defence UAVs |
-| **BAE Systems** (UK) | `BAE SYSTEMS` | UK defence prime; tactical UAVs |
-| **Thales** (French) | `THALES` | French defence; sensors and systems |
-| **General Atomics** (US) | `GENERAL ATOMICS` | US prime; Predator, Reaper developers |
-| **Elbit Systems** (Israeli) | `ELBIT` | Israeli defence; tactical UAVs |
-| **Israel Aerospace Industries** (Israeli) | `ISRAEL AEROSPACE` | Israeli aerospace; diverse UAV portfolio |
-| **AeroVironment** (US) | `AEROVIRONMENT` | US civil/military; small tactical UAVs |
-
-### Civilian Benchmark
-| Company | PATSTAT Name Patterns | Relevance |
-|---|---|---|
-| **DJI** (Chinese) | `SZ DJI`, `DJI TECHNOLOGY`, `DA-JIANG` | World's largest commercial drone manufacturer |
-
----
-
-## Data Quality Notes
-
-### Completeness Issues
-1. **CPC Reclassification (2023)**: Documents published before 2023 may use `B64C39/024` or `B64C2201` instead of `B64U`
-2. **Use Codes (B64U2101)**: Not assigned to every military drone; many use generic `B64U` codes
-3. **Name Harmonisation**: Companies appear under multiple names in PATSTAT; patterns are approximate
-
-### Truncation (Incomplete Years)
-- **Last 3 priority years** are incomplete in PATSTAT (documents still in pipeline, not yet reclassified)
-- **Last 1 publication year** is incomplete
-- Excluded from growth analysis; shaded in grey in figures
-
-### Sectoral Classification (`psn_sector`)
-- Values: `COMPANY`, `UNIVERSITY`, `GOV NON-PROFIT`, `INDIVIDUAL`, `HOSPITAL`, `UNKNOWN`
-- Some applicants have no entry in `tls207_pers_appln` (missing from applicant mix)
-- Coverage % is reported; if low, mention in technical appendix
-
----
-
-## References
-
-- **EPO CPC Scheme** (official): https://www.cooperativepatentclassification.org/cpcSchemeAndDefinitions/table
-- **PATSTAT Documentation**: EPO internal; access via TIP
-- **Course Material**: `graziasveva/innovation-management-datascience26` (GitHub)
-
----
-
-## Verification Checklist
-
-Before running PROD analysis:
-
-- [ ] **B64U codes verified** against official CPC scheme (https://www.cooperativepatentclassification.org/cpcSchemeAndDefinitions/table)
-- [ ] **Military use codes (B64U2101/15–19)** cover the intended scope
-- [ ] **Dual-use code (B64U2101/31)** includes surveillance without misclassifying civil-only drones
-- [ ] **Defence primes** name patterns checked against sample PATSTAT results (false positives?)
-- [ ] **Benchmarks** (manned aircraft, road vehicles) confirmed to exclude drone families
-- [ ] **Step 0 precision check** in `02_step1_flying_drones_team28.ipynb` confirms CPC definitions catch real drones
-- [ ] **Military precision check** in `04_q4_patents_vs_secrecy_team28.ipynb` (Section 2.1) confirms military titles are actually military
-
----
-
-*Last updated: 2026-10-18*
-*Team: 28 (Beybin Çiçek, Boujendar Omar, Nina, Parsa, Samu)*
+Per Prof. Ascione's guidance on grounding sector vocabulary and classification choices in academic literature:
+- **Zheng, X., Chen, X., Zhang, P., & Liu, F. (2026).** *Evolutionary pathways and future trends of civil UAV technologies: A patent-based data-driven analysis.* Inventions, 11(6), 117. (`doi:10.3390/inventions11060117`) — Maps civil UAV trajectories across `B64U`/`B64C` into autonomy, swarm intelligence, and low-altitude networked systems.
+- **Journal of Open Innovation (2020).** *Analysis of technological trends and technological portfolio of unmanned aerial vehicle.* J. Open Innov. Technol. Mark. Complex., 6(3), 48. (`doi:10.3390/joitmc6030048`) — Combines `B64C` aeronautical classifications with UAV keywords to evaluate technological portfolios.
+- **Choe, W. B. (2023).** *Analysis of technology trends in unmanned aerial vehicles using patent information.* J. Korean Soc. Nondestructive Testing, 6(3), 336–347. (`doi:10.31818/JKNST.2023.09.6.3.336`) — Quantifies UAV classification concentration and structural shifts.
+- **Acosta, M., Coronado, D., & Marín, R. (2018).** *Patents and dual-use technology: An empirical study of the world's largest defence companies.* Defence and Peace Economics, 29(7), 821–839. — PATSTAT empirical baseline for defence vs. dual-use patenting propensity.
