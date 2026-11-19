@@ -63,6 +63,7 @@ from src.step1_metrics import (
     compute_fractional_counts,
     compute_growth_summary,
     compute_period_mix_shift,
+    compute_post_peak_decomposition,
     compute_sector_share_of_all_patents,
     compute_share_table,
     flag_truncated_years,
@@ -235,6 +236,23 @@ class TestStep1Metrics(unittest.TestCase):
         para = build_q4_interpretation_paragraph(summ, {"military": 1, "dual_use": 1, "civil_and_other": 2})
         self.assertIn("25.0%", para)
         self.assertIn("Leonardo S.p.A.", para)
+
+    def test_post_2018_decomposition_contributions_sum_to_100(self):
+        # Toy country series: CN drops from 100/yr (2016-18) to 60/yr (2019-22) -> -40
+        # US drops from 50/yr to 40/yr -> -10; EP stays flat at 30/yr -> 0.
+        # Total net change = -50 -> CN explains 80%, US explains 20%, EP explains 0%.
+        rows = []
+        for y in range(2016, 2019):
+            rows += [{"ctry": "CN", "year": y, "n": 100}, {"ctry": "US", "year": y, "n": 50}, {"ctry": "EP", "year": y, "n": 30}]
+        for y in range(2019, 2023):
+            rows += [{"ctry": "CN", "year": y, "n": 60}, {"ctry": "US", "year": y, "n": 40}, {"ctry": "EP", "year": y, "n": 30}]
+        dec = compute_post_peak_decomposition(pd.DataFrame(rows), category_col="ctry")
+        self.assertAlmostEqual(dec.loc["CN", "abs_change_avg"], -40.0, places=9)
+        self.assertAlmostEqual(dec.loc["CN", "pct_change_avg"], -40.0, places=9)
+        self.assertAlmostEqual(dec.loc["CN", "share_of_net_change_pct"], 80.0, places=9)
+        self.assertAlmostEqual(dec.loc["US", "share_of_net_change_pct"], 20.0, places=9)
+        self.assertAlmostEqual(dec.loc["EP", "share_of_net_change_pct"], 0.0, places=9)
+        self.assertAlmostEqual(dec["share_of_net_change_pct"].sum(), 100.0, places=9)
 
 
 class TestStep2HarmonizeAndConcentration(unittest.TestCase):

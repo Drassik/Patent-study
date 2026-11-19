@@ -58,6 +58,24 @@ Replace every `[PROD: ...]` bracket with the exact value printed by the notebook
 
 ---
 
+## Q4b. Diagnosing the Post-2018 Filing Slowdown (Dr. Giacomo Masali Feedback)
+
+During the November 18 tutoring review, Dr. Giacomo Masali noted that citing **secrecy** to explain an observed post-2018 decline in UAV patent filings is a **receivable hypothesis**, provided it is tested empirically by checking **which specific countries and CPC codes** declined. Section 6 of `notebooks/02_step1_q4_patents_vs_secrecy_team28.ipynb` decomposes the `2016–2018` vs. `2019–2022` complete-year change (`post2018_decomp_*.csv`, `fig03_post2018_diagnostic.png`) to discriminate among **three competing mechanisms**:
+
+1. **Mechanism A — Defence Secrecy & Geopolitical Tightening (Secrecy Hypothesis):**
+   - *Empirical test:* Did **Military UAV codes** (`B64U 2101/15–19`, `F41`, `F42B`) and **Western/allied defence jurisdictions (`US`, `EP`, `IL`)** decline disproportionately faster after 2018, accompanied by rising single-office shares / falling PCT rates?
+   - *Theory link:* Compulsory invention secrecy orders (Gross, 2023), export controls (ITAR / EU Dual-Use), and asymmetric battlefield reverse-engineering shift defence firms from patents to secrecy and lead-time (Arundel, 2001; Acosta et al., 2018).
+2. **Mechanism B — Airframe Dominant Design Lock-In (Abernathy–Utterback Maturity):**
+   - *Empirical test:* Did mechanical airframe classes (`B64U 10/`, `20/`, `30/`, `B64C`) peak around 2018 while software, autonomy, vision, and UTM classes (`G05D`, `G06V`, `G08G`, `H04W`) remained resilient or kept growing?
+   - *Theory link:* Once the quadcopter/multirotor dominant design crystallized (Abernathy & Utterback, 1975), incremental airframe patenting plateaued while R&D pivoted to architectural/software layers (Henderson & Clark, 1990).
+3. **Mechanism C — Country-Specific Filing Policy & Reclassification Lag (China CNIPA Effect):**
+   - *Empirical test:* What exact percentage of the total `2016–2018 -> 2019–2022` net change (`share_of_net_change_pct`) comes from **China (`CN`)** alone vs. `US`/`EP`/`JP`/`KR`?
+   - *Context:* China phased out local patent-filing subsidies (2018–2021) and tightened CNIPA "irregular patent" scrutiny, causing aggregate CN filing counts to cool across multiple hardware sectors, compounded by IPC→CPC reclassification lags (addressed by Samuele's `CPC ∪ IPC` union).
+
+> **Slide discipline:** Report whichever combination the `PROD` decomposition tables actually prove (exact `share_of_net_change_pct` by office, country, CPC subclass, and military/dual-use/civil segment) rather than asserting secrecy without disaggregating the drop.
+
+---
+
 ## Verified References (Author–Year Style for Deck & Appendix)
 
 - **Abernathy, W. J., & Utterback, J. M. (1975).** A dynamic model of process and product innovation. *Omega*, 3(6), 639–656.

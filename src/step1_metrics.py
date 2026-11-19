@@ -361,3 +361,74 @@ def build_q4_interpretation_paragraph(
         "while pure-defence capabilities are structurally under-represented in public patent counts."
     )
     return "\n".join(lines)
+
+
+# ------------------------------------------------------------------ Post-2018 Decline Diagnostic (Giacomo Feedback)
+def compute_post_peak_decomposition(
+    df: pd.DataFrame,
+    category_col: str,
+    year_col: str = "year",
+    value_col: str = "n",
+    peak_window: Tuple[int, int] = (2016, 2018),
+    post_window: Tuple[int, int] = (2019, 2022),
+    peak_year: int = 2018,
+    end_year: int = 2022,
+) -> pd.DataFrame:
+    """Decompose the post-2018 change across countries, offices, CPC classes, or UAV segments.
+
+    Directly addresses Dr. Giacomo Masali's feedback: test whether a post-2018 patenting drop
+    is concentrated in specific countries (e.g. CN vs US/EP) or specific CPC/military codes
+    (secrecy vs dominant-design hardware maturity vs national filing policy).
+
+    Returns a DataFrame indexed by category with:
+      - avg_peak_window  : mean annual count in peak_window (default 2016-2018)
+      - avg_post_window  : mean annual count in post_window (default 2019-2022)
+      - abs_change_avg   : avg_post_window - avg_peak_window
+      - pct_change_avg   : (avg_post_window / avg_peak_window - 1) * 100
+      - share_of_net_change_pct : exact % contribution of this category to the total net change
+      - count_peak_year, count_end_year, pct_change_point : point-to-point peak_year -> end_year
+    """
+    data = df[[category_col, year_col, value_col]].copy()
+    n_peak_yrs = peak_window[1] - peak_window[0] + 1
+    n_post_yrs = post_window[1] - post_window[0] + 1
+
+    peak_sum = (
+        data[data[year_col].between(*peak_window)]
+        .groupby(category_col)[value_col]
+        .sum()
+    )
+    post_sum = (
+        data[data[year_col].between(*post_window)]
+        .groupby(category_col)[value_col]
+        .sum()
+    )
+    pt_peak = data[data[year_col] == peak_year].groupby(category_col)[value_col].sum()
+    pt_end = data[data[year_col] == end_year].groupby(category_col)[value_col].sum()
+
+    all_cats = peak_sum.index.union(post_sum.index)
+    avg_peak = peak_sum.reindex(all_cats, fill_value=0.0) / float(n_peak_yrs)
+    avg_post = post_sum.reindex(all_cats, fill_value=0.0) / float(n_post_yrs)
+    abs_diff = avg_post - avg_peak
+    total_net_diff = float(abs_diff.sum())
+
+    out = pd.DataFrame(
+        {
+            f"avg_{peak_window[0]}_{peak_window[1]}": avg_peak,
+            f"avg_{post_window[0]}_{post_window[1]}": avg_post,
+            "abs_change_avg": abs_diff,
+            "pct_change_avg": np.where(avg_peak > 0, (avg_post / avg_peak - 1.0) * 100.0, np.nan),
+            "share_of_net_change_pct": (
+                (abs_diff / total_net_diff) * 100.0 if abs(total_net_diff) > 1e-12 else np.nan
+            ),
+            f"count_{peak_year}": pt_peak.reindex(all_cats, fill_value=0.0),
+            f"count_{end_year}": pt_end.reindex(all_cats, fill_value=0.0),
+            f"pct_change_{peak_year}_{end_year}": np.where(
+                pt_peak.reindex(all_cats, fill_value=0.0) > 0,
+                (pt_end.reindex(all_cats, fill_value=0.0) / pt_peak.reindex(all_cats, fill_value=0.0) - 1.0) * 100.0,
+                np.nan,
+            ),
+        }
+    )
+    out.index.name = category_col
+    return out.sort_values("abs_change_avg", ascending=True)
+
