@@ -21,6 +21,14 @@ from src.config_loader import (
     get_last_complete_year,
     load_config,
 )
+from src.future_score import (
+    backtest_future_algorithms,
+    compute_cross_layer_architecture_score,
+    compute_future_indicators_per_firm,
+    compute_hot_subfield_score,
+    compute_novel_recombination_per_family,
+    compute_originality_per_family,
+)
 from src.harmonize import (
     clean_with_tutorial_dictionary,
     coefficient_of_variation,
@@ -31,6 +39,17 @@ from src.harmonize import (
     herfindahl_index,
     lotka_coefficient,
     six_concentration_measures,
+)
+from src.present_score import (
+    combine_present_score,
+    compute_family_forward_citations_norm,
+    compute_present_indicators_per_firm,
+    rank_firms,
+    run_ranking_robustness_check,
+)
+from src.quadrant import (
+    assign_magic_quadrant,
+    compute_revealed_technological_advantage,
 )
 from src.step0_loader import (
     filter_text_by_keywords,
@@ -300,6 +319,121 @@ class TestStep2HarmonizeAndConcentration(unittest.TestCase):
         self.assertAlmostEqual(herfindahl_index(giant), 0.91**2 + 9 * 0.01**2, places=9)
         self.assertGreater(gini_coefficient(giant), 0.8)
         self.assertGreater(coefficient_of_variation(giant), 2.5)
+
+
+class TestSteps3To6ValuationAndQuadrant(unittest.TestCase):
+    def test_present_score_mean_vs_rrf_and_wo_translation_exclusion(self):
+        # Tutorial 40 worked intuition: Giant X dominates volume but average elsewhere; Specialist Y leads on 3/4
+        df = pd.DataFrame(
+            {
+                "volume": [0.44, 0.06, 0.10, 0.10],
+                "influence": [1.0, 1.5, 1.0, 0.5],
+                "success": [0.70, 0.90, 0.65, 0.55],
+                "globalization": [2.0, 3.5, 2.5, 1.5],
+            },
+            index=["GIANT_X", "SPECIALIST_Y", "MID_Z", "SMALL_W"],
+        )
+        equal_w = {"volume": 0.25, "influence": 0.25, "success": 0.25, "globalization": 0.25}
+        s_mean = combine_present_score(df, equal_w, method="mean")
+        s_rrf = combine_present_score(df, equal_w, method="rrf")
+        # Mean rewards Giant X's massive volume skew; RRF puts Specialist Y #1!
+        self.assertEqual(rank_firms(s_mean)["GIANT_X"], 1)
+        self.assertEqual(rank_firms(s_rrf)["SPECIALIST_Y"], 1)
+
+        ranks_df, spearman = run_ranking_robustness_check(df, equal_w, method="rrf")
+        self.assertIn("equal_weights", ranks_df.columns)
+        self.assertIn("alt_method_mean", spearman.index)
+
+        # Verify WO and kind 'T' translations are excluded from Success & Globalization
+        fams = pd.DataFrame(
+            [
+                {"docdb_family_id": 1, "priority_year": 2015, "first_publn_year": 2016},
+                {"docdb_family_id": 2, "priority_year": 2015, "first_publn_year": 2016},
+            ]
+        )
+        ff = pd.DataFrame([{"docdb_family_id": 1, "firm": "FIRM_A"}, {"docdb_family_id": 2, "firm": "FIRM_B"}])
+        apps = pd.DataFrame(
+            [
+                # Family 1: EP granted + US not granted + WO (ignored) + ES kind T translation (ignored) -> success = 0.5, offices = 2
+                {"appln_id": 10, "docdb_family_id": 1, "appln_auth": "EP", "appln_kind": "A ", "granted": "Y"},
+                {"appln_id": 11, "docdb_family_id": 1, "appln_auth": "US", "appln_kind": "A ", "granted": "N"},
+                {"appln_id": 12, "docdb_family_id": 1, "appln_auth": "WO", "appln_kind": "W ", "granted": "N"},
+                {"appln_id": 13, "docdb_family_id": 1, "appln_auth": "ES", "appln_kind": "T ", "granted": "Y"},
+                # Family 2: CN granted -> success = 1.0, offices = 1
+                {"appln_id": 20, "docdb_family_id": 2, "appln_auth": "CN", "appln_kind": "A ", "granted": "Y"},
+            ]
+        )
+        cits = pd.DataFrame(
+            [
+                {"citing_family": 901, "cited_family": 1, "citing_year": 2018},  # lag 2 <= 5
+                {"citing_family": 902, "cited_family": 1, "citing_year": 2019},  # lag 3 <= 5
+                {"citing_family": 903, "cited_family": 1, "citing_year": 2024},  # lag 8 > 5 (excluded)
+                {"citing_family": 904, "cited_family": 2, "citing_year": 2017},  # lag 1 <= 5
+            ]
+        )
+        # Cohort mean fwd5 for 2015 = (2 + 1) / 2 = 1.5 -> Firm A = 2/1.5 = 4/3, Firm B = 1/1.5 = 2/3
+        ind = compute_present_indicators_per_firm(fams, ff, apps, cits, min_families=1, top_n_firms=5)
+        self.assertAlmostEqual(ind.loc["FIRM_A", "success"], 0.5, places=9)
+        self.assertAlmostEqual(ind.loc["FIRM_A", "globalization"], 2.0, places=9)
+        self.assertAlmostEqual(ind.loc["FIRM_A", "influence"], 4.0 / 3.0, places=9)
+        self.assertAlmostEqual(ind.loc["FIRM_B", "influence"], 2.0 / 3.0, places=9)
+
+    def test_future_score_originality_recombination_and_no_leakage_backtest(self):
+        # Originality: citing 2 classes equally (0.5, 0.5) -> 1 - (0.25 + 0.25) = 0.5
+        bc = pd.DataFrame([{"docdb_family_id": 10, "cited_docdb_family_id": 1}, {"docdb_family_id": 10, "cited_docdb_family_id": 2}])
+        cc = pd.DataFrame([{"cited_docdb_family_id": 1, "cpc_subclass": "B64U"}, {"cited_docdb_family_id": 2, "cpc_subclass": "G05D"}])
+        orig = compute_originality_per_family(bc, cc)
+        self.assertAlmostEqual(orig.loc[10], 0.5, places=9)
+
+        # Novel recombination: 2015 introduces (A, B) -> 1.0; 2016 repeats (A, B) -> 0.0; 2016 adds (A, C) -> 1/3 or 1.0
+        cpc = pd.DataFrame(
+            [
+                {"docdb_family_id": 1, "priority_year": 2015, "cpc_subclass": "B64U", "cpc_group": "A"},
+                {"docdb_family_id": 1, "priority_year": 2015, "cpc_subclass": "G05D", "cpc_group": "B"},
+                {"docdb_family_id": 2, "priority_year": 2016, "cpc_subclass": "B64U", "cpc_group": "A"},
+                {"docdb_family_id": 2, "priority_year": 2016, "cpc_subclass": "G05D", "cpc_group": "B"},
+                {"docdb_family_id": 3, "priority_year": 2016, "cpc_subclass": "B64U", "cpc_group": "A"},
+                {"docdb_family_id": 3, "priority_year": 2016, "cpc_subclass": "G06V", "cpc_group": "C"},
+                {"docdb_family_id": 3, "priority_year": 2016, "cpc_subclass": "G08G", "cpc_group": "D"},
+            ]
+        )
+        rec = compute_novel_recombination_per_family(cpc)
+        self.assertAlmostEqual(rec.loc[1], 1.0, places=9)
+        self.assertAlmostEqual(rec.loc[2], 0.0, places=9)
+        self.assertAlmostEqual(rec.loc[3], 1.0, places=9)
+
+        # Cross-layer score: fam 3 bridges 3 distinct layers (B64U, G06V, G08G) -> (3-1)/2 = 1.0
+        cl = compute_cross_layer_architecture_score(cpc)
+        self.assertAlmostEqual(cl.loc[3], 1.0, places=9)
+        self.assertAlmostEqual(cl.loc[1], 0.5, places=9)
+
+        # Backtest perfect ranking -> Spearman = 1.0, Precision@2 = 1.0, NDCG@2 = 1.0
+        scores_T = pd.DataFrame(
+            {"originality": [0.1, 0.5, 0.9], "future_score": [10.0, 50.0, 90.0]},
+            index=["F1", "F2", "F3"],
+        )
+        realized = pd.Series([5.0, 20.0, 100.0], index=["F1", "F2", "F3"])
+        bt = backtest_future_algorithms(scores_T, realized, candidate_columns=("originality", "future_score"), top_k=2)
+        self.assertAlmostEqual(bt.loc["future_score", "spearman_rho"], 1.0, places=9)
+        self.assertAlmostEqual(bt.loc["future_score", "precision_at_2"], 1.0, places=9)
+        self.assertAlmostEqual(bt.loc["future_score", "ndcg_at_2"], 1.0, places=9)
+
+    def test_magic_quadrant_and_patel_pavitt_rta(self):
+        pres = pd.Series([90, 90, 20, 20], index=["L", "C", "V", "N"])
+        fut = pd.Series([90, 20, 90, 20], index=["L", "C", "V", "N"])
+        fams = pd.Series([100, 80, 30, 15], index=["L", "C", "V", "N"])
+        qdf, x_thr, y_thr = assign_magic_quadrant(pres, fut, fams)
+        self.assertEqual(qdf["quadrant"].to_dict(), {"L": "Leaders", "C": "Challengers", "V": "Visionaries", "N": "Niche Players"})
+
+        # Exact RTA arithmetic (Patel & Pavitt 1997):
+        # Firm A: 8 in G05D, 2 in B64U (80% in G05D). Firm B: 2 in G05D, 8 in B64U (20% in G05D).
+        # Sector total: 10 in G05D (50%), 10 in B64U (50%).
+        # RTA(A, G05D) = 0.80 / 0.50 = 1.60; RTA(A, B64U) = 0.20 / 0.50 = 0.40
+        mat = pd.DataFrame({"G05D": [8, 2], "B64U": [2, 8]}, index=["FIRM_A", "FIRM_B"])
+        rta = compute_revealed_technological_advantage(mat)
+        self.assertAlmostEqual(rta.loc["FIRM_A", "G05D"], 1.6, places=9)
+        self.assertAlmostEqual(rta.loc["FIRM_A", "B64U"], 0.4, places=9)
+        self.assertAlmostEqual(rta.loc["FIRM_B", "B64U"], 1.6, places=9)
 
 
 if __name__ == "__main__":

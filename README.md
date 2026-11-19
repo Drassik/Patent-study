@@ -20,15 +20,21 @@ Patent-study/
 │   ├── config_loader.py                              # Load & validate config/sector.yaml + official CPC definitions
 │   ├── step0_loader.py                               # Load locked Step 0 CSV (uav_final_query_families.csv) or fallback TIP query
 │   ├── step1_metrics.py                              # Pure pandas/numpy indicator functions for Step 1 (Q1–Q4)
-│   └── harmonize.py                                  # Step 2 applicant name harmonizer + 6 Liston-Heyes & Pilkington (2004) metrics
+│   ├── harmonize.py                                  # Step 2 applicant name harmonizer + 6 Liston-Heyes & Pilkington (2004) metrics
+│   ├── present_score.py                              # Step 3 Present Value Score (Clarivate 4 dims, Mean vs RRF, Spearman robustness)
+│   ├── future_score.py                               # Step 4 Future Value Algorithm (baselines + UAV cross-layer + temporal back-test)
+│   └── quadrant.py                                   # Steps 5–6 Magic Quadrant plot & Revealed Technological Advantage (Patel & Pavitt)
 ├── notebooks/
 │   ├── 01_step1_general_description_team28.ipynb     # Unified Step 1 (Q1 Volume/Growth, Q2 Tech Mix, Q3 Geography)
 │   ├── 02_step1_q4_patents_vs_secrecy_team28.ipynb   # Unified Step 1 Q4 (Patents vs Secrecy, Benchmarks, Defence Primes vs DJI)
 │   └── 03_step2_harmonization_benchmark.ipynb        # Step 2 Harmonization gold-standard benchmark + UAV concentration starter
 ├── tests/
-│   └── test_indicators.py                            # Unit tests on toy datasets with known analytical answers
+│   └── test_indicators.py                            # Unit tests on toy datasets with known analytical answers (Steps 0–6)
 ├── docs/
-│   └── STEP1_INTERPRETATION_FRAMEWORK.md             # Theory-grounded Step 1 slide narrative & verified academic references
+│   ├── STEP1_INTERPRETATION_FRAMEWORK.md             # Theory-grounded Step 1 slide narrative & verified academic references
+│   ├── LEONARDO_CLIENT_AND_PEST_ANALYSIS.md          # Mandatory Step 2 PEST analysis (cited 2024–2026 sources) & Leonardo profile
+│   └── DECK_20_SLIDES_BLUEPRINT.md                   # Exact 20-slide deck plan, A4 appendix checklist & 10-min pitch storyboard
+├── run_all.py                                        # One-command reproducible pipeline (Steps 1–6 from cleaned extracts or --demo)
 ├── Query_Calibration_Taxonomy_Audit.ipynb            # Step 0 query calibration & stratified 100-family precision audit (Samuele)
 ├── CPC_CODES_REFERENCE.md                            # Verified official CPC/IPC definitions & Step 0 precision diagnosis
 └── requirements.txt                                  # Reproducible Python dependencies
@@ -41,9 +47,10 @@ Patent-study/
 ## Quick Start
 
 ### 1. Local Verification (No TIP Access Needed)
-Run all unit tests on toy data with known analytical answers:
+Run all unit tests on toy data with known analytical answers and verify end-to-end Steps 1–6 reproducibility:
 ```bash
 python3 -m unittest discover -s tests -v
+python3 run_all.py --demo
 ```
 
 ### 2. Running Step 1 & Step 2 on EPO TIP
