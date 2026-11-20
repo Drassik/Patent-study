@@ -75,6 +75,17 @@ GEO_TOKENS = {
     "BE", "AT", "ES", "CA", "AU",
 }
 
+# Chinese provinces and large cities, plus a few Japanese/Korean cities (added for the UAV dataset:
+# without them, names like "GUANGDONG CROWNPOWER ..." used the province as if it were a brand)
+GEO_TOKENS |= {
+    "GUANGDONG", "JIANGSU", "ZHEJIANG", "SHANDONG", "SICHUAN", "HUBEI", "HUNAN", "HENAN", "HEBEI",
+    "FUJIAN", "ANHUI", "SHAANXI", "SHANXI", "YUNNAN", "GUANGXI", "JIANGXI", "LIAONING", "JILIN",
+    "HEILONGJIANG", "GUIZHOU", "GANSU", "HAINAN", "XINJIANG", "NINGXIA", "QINGHAI", "TIBET",
+    "MONGOLIA", "CHONGQING", "QINGDAO", "XIAMEN", "NINGBO", "DONGGUAN", "FOSHAN", "ZHUHAI", "WUXI",
+    "CHANGZHOU", "JINAN", "ZHENGZHOU", "KUNMING", "SHENYANG", "DALIAN", "FUZHOU", "NANCHANG",
+    "TOKYO", "OSAKA", "BUSAN", "DAEJEON", "INCHEON",
+}
+
 INSTITUTION_MARKERS = {
     "UNIVERSITY", "UNIV", "UNIVERSITA", "UNIVERSITE", "UNIVERSITAT",
     "UNIVERSIDAD", "UNIVERSITEIT", "POLYTECHNIC", "POLYTECHNICAL", "COLLEGE",

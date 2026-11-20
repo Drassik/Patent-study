@@ -331,12 +331,14 @@ domain_corporate_groups:
       - "BEIHANG UNIVERSITY"
       - "BEIJING UNIVERSITY OF AERONAUTICS AND ASTRONAUTICS"
       - "BEIJING UNIV OF AERONAUTICS"
+      - "UNIV BEIHANG"
   NANJING UNIV AERONAUTICS ASTRONAUTICS:
     role: "University"
     country: "CN"
     patterns:
       - "NANJING UNIVERSITY OF AERONAUTICS AND ASTRONAUTICS"
       - "NANJING UNIV OF AERONAUTICS"
+      - "UNIV NANJING AERONAUTICS"
   NORTHWESTERN POLYTECHNICAL UNIVERSITY:
     role: "University"
     country: "CN"
@@ -348,3 +350,42 @@ domain_corporate_groups:
     country: "CN"
     patterns:
       - "STATE GRID"
+  # Parent groups added after the Step 2 audit of the top harmonized clusters
+  ALPHABET:
+    role: "Tech group (Google, X Development, Wing, Makani)"
+    country: "US"
+    patterns:
+      - "GOOGLE"
+      - "X DEVELOPMENT"
+      - "WING AVIATION"
+      - "MAKANI"
+  TEXTRON:
+    role: "Defence / aerospace group (Bell)"
+    country: "US"
+    patterns:
+      - "TEXTRON"
+      - "BELL HELICOPTER"
+      - "BELL TEXTRON"
+  TELEDYNE:
+    role: "Sensors / defence group (FLIR, acquired 2021)"
+    country: "US"
+    patterns:
+      - "TELEDYNE"
+      - "FLIR"
+  MITSUBISHI ELECTRIC:
+    role: "Electronics conglomerate (separate from Mitsubishi Heavy Industries)"
+    country: "JP"
+    patterns:
+      - "MITSUBISHI ELECTRIC"
+  MITSUBISHI HEAVY INDUSTRIES:
+    role: "Aerospace / defence (separate from Mitsubishi Electric)"
+    country: "JP"
+    patterns:
+      - "MITSUBISHI HEAVY INDUSTRIES"
+      - "MITSUBISHI HEAVY IND"
+  ZERO ZERO TECHNOLOGY:
+    role: "Consumer UAV (Hangzhou Zero Zero Technology)"
+    country: "CN"
+    patterns:
+      - "ZERO ZERO"
+      - "ZERO ZRO"
