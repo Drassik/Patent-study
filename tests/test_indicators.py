@@ -96,6 +96,14 @@ class TestConfigAndLoader(unittest.TestCase):
             self.assertEqual(len(loaded), 3)
             self.assertEqual(loaded["docdb_family_id"].tolist(), [101, 102, 103])
 
+            # Also verify Samuele's 'stratum' schema maps seamlessly to 'query_source'
+            p2 = Path(tmp) / "samu_step0.csv"
+            pd.DataFrame(
+                {"docdb_family_id": [201, 202], "stratum": ["core", "boundary_rescue"]}
+            ).to_csv(p2, index=False)
+            loaded2 = load_locked_step0_families(p2)
+            self.assertEqual(loaded2["query_source"].tolist(), ["core", "boundary_rescue"])
+
         batches = list(iter_batches([1, 2, 2, 3, 4, 5], batch_size=2))
         self.assertEqual(batches, [[1, 2], [3, 4], [5]])
 

@@ -39,7 +39,7 @@ def load_locked_step0_families(csv_path: Path | str) -> pd.DataFrame:
 
     Expected columns:
       - docdb_family_id (int, required)
-      - query_source (str, optional: e.g. 'core_classification', 'boundary_rescue')
+      - stratum or query_source (str, optional: e.g. 'core', 'core_classification', 'boundary_rescue')
     """
     path = Path(csv_path)
     df = pd.read_csv(path)
@@ -54,7 +54,10 @@ def load_locked_step0_families(csv_path: Path | str) -> pd.DataFrame:
         raise ValueError(f"Found missing/non-numeric docdb_family_id values in {path}")
     out["docdb_family_id"] = out["docdb_family_id"].astype("int64")
     if "query_source" not in out.columns:
-        out["query_source"] = "locked_step0"
+        if "stratum" in out.columns:
+            out["query_source"] = out["stratum"].astype(str)
+        else:
+            out["query_source"] = "locked_step0"
     out = out.drop_duplicates(subset=["docdb_family_id"]).reset_index(drop=True)
     return out[["docdb_family_id", "query_source"]]
 
