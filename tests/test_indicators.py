@@ -236,6 +236,14 @@ class TestStep1Metrics(unittest.TestCase):
         para = build_q4_interpretation_paragraph(summ, {"military": 1, "dual_use": 1, "civil_and_other": 2})
         self.assertIn("25.0%", para)
         self.assertIn("Leonardo S.p.A.", para)
+        self.assertIn("limiting foreign filings", para)
+
+        # Positive-selection branch when military PCT > civil PCT (as observed on PROD)
+        summ_prod_like = summ.copy()
+        summ_prod_like.loc["Military drones", "pct_share_pct"] = 30.7
+        summ_prod_like.loc["Civil drones", "pct_share_pct"] = 20.4
+        para_sel = build_q4_interpretation_paragraph(summ_prod_like, {"military": 2, "dual_use": 2, "civil_and_other": 96})
+        self.assertIn("positive selection effect", para_sel)
 
     def test_post_2018_decomposition_contributions_sum_to_100(self):
         # Toy country series: CN drops from 100/yr (2016-18) to 60/yr (2019-22) -> -40
