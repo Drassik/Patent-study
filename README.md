@@ -17,6 +17,7 @@ Patent-study/
 ├── config/
 │   └── sector.yaml                                   # Single source of truth: CPC/IPC codes, keywords, windows, benchmarks, corporate trees
 ├── src/
+│   ├── 00_extract.py.py                              # Step 0 script for the creation of the dataset
 │   ├── config_loader.py                              # Load & validate config/sector.yaml + official CPC definitions
 │   ├── step0_loader.py                               # Load locked Step 0 CSV (uav_final_query_families.csv) or fallback TIP query
 │   ├── step1_metrics.py                              # Pure pandas/numpy indicator functions for Step 1 (Q1–Q4)
@@ -25,9 +26,11 @@ Patent-study/
 │   ├── future_score.py                               # Step 4 Future Value Algorithm (baselines + UAV cross-layer + temporal back-test)
 │   └── quadrant.py                                   # Steps 5–6 Magic Quadrant plot & Revealed Technological Advantage (Patel & Pavitt)
 ├── notebooks/
+│   ├── Query_Calibration_Taxonomy_Audit.ipynb        # Step 0 query calibration & stratified 100-family precision audit (Samuele)
 │   ├── 01_step1_general_description_team28.ipynb     # Unified Step 1 (Q1 Volume/Growth, Q2 Tech Mix, Q3 Geography)
 │   ├── 02_step1_q4_patents_vs_secrecy_team28.ipynb   # Unified Step 1 Q4 (Patents vs Secrecy, Benchmarks, Defence Primes vs DJI)
 │   └── 03_step2_harmonization_benchmark.ipynb        # Step 2 Harmonization gold-standard benchmark + UAV concentration starter
+│   └── 04_step2_comptetitive_landscape.ipynb         # Step 2 Comptetitive landscape analysis
 ├── tests/
 │   └── test_indicators.py                            # Unit tests on toy datasets with known analytical answers (Steps 0–6)
 ├── docs/
@@ -35,7 +38,6 @@ Patent-study/
 │   ├── LEONARDO_CLIENT_AND_PEST_ANALYSIS.md          # Mandatory Step 2 PEST analysis (cited 2024–2026 sources) & Leonardo profile
 │   └── DECK_20_SLIDES_BLUEPRINT.md                   # Exact 20-slide deck plan, A4 appendix checklist & 10-min pitch storyboard
 ├── run_all.py                                        # One-command reproducible pipeline (Steps 1–6 from cleaned extracts or --demo)
-├── Query_Calibration_Taxonomy_Audit.ipynb            # Step 0 query calibration & stratified 100-family precision audit (Samuele)
 ├── CPC_CODES_REFERENCE.md                            # Verified official CPC/IPC definitions & Step 0 precision diagnosis
 └── requirements.txt                                  # Reproducible Python dependencies
 ```
