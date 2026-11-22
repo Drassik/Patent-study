@@ -1,5 +1,4 @@
 outputs/
-data/raw/
 data/processed/
 *.parquet
 .ipynb_checkpoints/
